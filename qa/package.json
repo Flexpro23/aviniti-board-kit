@@ -1,0 +1,19 @@
+{
+  "name": "aviniti-ui-board-qa",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Automated QA tooling for Aviniti UI proposal boards. Runs Playwright checks and axe-core accessibility audits against self-contained HTML mockup files.",
+  "type": "module",
+  "scripts": {
+    "qa": "node run-qa.mjs",
+    "pw": "node playwright-qa.mjs",
+    "axe": "node axe-audit.mjs"
+  },
+  "dependencies": {
+    "axe-core": "4.10.2",
+    "playwright": "1.49.1"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

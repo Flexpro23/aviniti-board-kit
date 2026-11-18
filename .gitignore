@@ -1,0 +1,19 @@
+# Allowlist: only the kit itself is tracked.
+# Client folders (ClientName/) stay local — they never reach this repo.
+/*
+!/.gitignore
+!/README.md
+!/CLAUDE.md
+!/NBG-logo.png
+!/skills-lock.json
+!/_template/
+!/qa/
+!/.claude/
+!/Example/
+
+node_modules/
+QA_screenshots/
+.DS_Store
+*.log
+.vercel/
+.claude/settings.local.json
