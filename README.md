@@ -1,52 +1,73 @@
 # Aviniti Board Kit
 
-A kit for building **self-contained, interactive UI mockup boards** for client proposals and design reviews, made to be driven by [Claude Code](https://claude.com/claude-code).
+A kit for designing products as **bilingual (Arabic RTL + English LTR) interactive UI boards**: a design system plus every screen, for client proposals and design reviews. It is meant to be driven by [Claude Code](https://claude.com/claude-code).
 
-Every board is a single HTML file. It opens in any browser, needs no build step and has nothing to install. Inside each board, React, Babel, Leaflet and the fonts load from CDNs.
+Every board is a self-contained HTML file. It opens in any browser and needs no build step to view.
+
+## Two ways to build
+
+| | Quick board | Studio (`/studio`) |
+|---|---|---|
+| For | A sales teaser, the first few key screens | A full design system plus complete boards for every role |
+| Size | 3–12 screens in one HTML file | 20–300 screens across several boards and a hub |
+| Example | `Example/Example_UI_Board.html` | `Example-Studio/Boards/index.html` (Fernly) |
 
 ## What's inside
 
 | Path | What it is |
 |---|---|
-| `CLAUDE.md` | The full playbook Claude follows: pipeline, intake questionnaire, design rules, board anatomy |
-| `_template/` | Four board starters (mobile, dashboard, tablet, watch), `design-tokens.js` (theme presets + components), and the `PROJECT.md` template |
-| `qa/` | Automated QA: Playwright (9 checks + screenshots) and axe-core accessibility audit |
-| `.claude/skills/` | `/brand-from-logo`, `/sync-project`, `/qa`, `/qa-quick` |
+| `CLAUDE.md` | The playbook Claude follows: pipeline, intake questionnaire, design rules, board anatomy |
+| `_template/*-starter.html` | Quick-board starters: mobile, dashboard, tablet, watch |
+| `_template/design-tokens.js` | Theme presets and component specs for quick boards |
+| `_template/studio/` | Studio scaffold, in four parts: <br>• **Specs:** brief, page inventory, build and audit specs <br>• **Token generator:** palette anchors → contrast-checked light/dark tokens <br>• **Board engine:** design-system board, shared React components, device shells <br>• **Tools:** build, capture and verify |
+| `Example-Studio/` | A complete studio project for a fictional plant shop, already built |
+| `qa/` | Automated QA: Playwright checks + axe-core accessibility audits in light and dark |
+| `.claude/skills/` | `/studio`, `/brand-from-logo`, `/sync-project`, `/qa`, `/qa-quick` |
 | `.claude/hooks/` | Reminds Claude to update `PROJECT.md` whenever a board changes |
+
+## Requirements
+
+- [Claude Code](https://claude.com/claude-code)
+- Node.js 18 or later
+- Python 3 (standard library only)
+- git
+- Internet access: boards load React, Babel and Google Fonts from CDNs
 
 ## Setup
 
 ```bash
-git clone <this repo> aviniti-board-kit
+git clone https://github.com/Flexpro23/aviniti-board-kit.git
 cd aviniti-board-kit/qa
 npm install
 npx playwright install chromium
 ```
 
-Then open the repo folder in Claude Code. `CLAUDE.md`, the skills and the hook load automatically.
+Then open the `aviniti-board-kit` folder in Claude Code. `CLAUDE.md`, the skills and the hook load automatically.
 
 ### Optional skills
 
-These third-party skills extend the kit. They are not bundled, so install them yourself and respect each one's license (`skills-lock.json` lists the sources):
+Third-party skills that extend the kit. They are not bundled; each keeps its own license. Install them for your user (`-g`) so they stay out of the repo:
 
 ```bash
-npx skills add addyosmani/web-quality-skills --skill accessibility
-npx skills add addyosmani/web-quality-skills --skill performance
-npx skills add google-labs-code/stitch-skills --skill stitch-design
-npx skills add alchaincyf/huashu-design        # personal-use license
+npx skills add addyosmani/web-quality-skills -s accessibility -s performance -a claude-code -g -y
+npx skills add alchaincyf/huashu-design -a claude-code -g -y
 ```
 
-## Your first board
+## Your first project
 
-Ask Claude:
+Describe the product to Claude. For a full design system and boards:
 
-> New client: Acme Logistics, driver app, Arabic-first, Amman. Here's their logo: ./acme-logo.png
+> /studio — Acme Logistics: a delivery platform in Amman, Arabic-first. A driver app, a dispatcher console and an admin dashboard. Here's their logo: ./acme-logo.png
 
-Claude runs intake, extracts the brand from the logo, creates `AcmeLogistics/PROJECT.md`, writes the chapter narrative, builds `AcmeLogistics/AcmeLogistics_Driver_UI_Board.html` from the mobile starter, and runs QA:
+Claude works through the project in order:
+1. **Brief:** writes the brief.
+2. **Design system:** sets the palette and builds the design-system board. It stops for your approval.
+3. **Page inventory:** lists every screen per board. It stops for your approval again.
+4. **Reference chapter:** builds one chapter itself, to set the quality bar.
+5. **Boards and audits:** sends parallel builder agents for the rest, then independent auditors.
+6. **Final QA:** runs it and hands you `AcmeLogistics/Boards/index.html`.
 
-```bash
-cd qa && npm run qa -- ../AcmeLogistics/AcmeLogistics_Driver_UI_Board.html
-```
+For a quick board, just ask for one, for example: "a 6-screen driver app board for Acme Logistics."
 
 ## Keeping client work private
 

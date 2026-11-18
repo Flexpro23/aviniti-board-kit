@@ -6,6 +6,19 @@ Every board: one HTML file, opens in any browser, no build step, no dependencies
 
 Client work lives in one folder per client at the repo root (`ClientName/`). Those folders are yours — keep them out of any public fork (see `.gitignore`).
 
+## Two ways to build — pick one per project
+
+| | **Quick board** | **Studio** (`/studio`) |
+|---|---|---|
+| For | Sales teaser, early proposal, a few key moments | A full design system plus complete boards for every role |
+| Size | 3–12 screens, one persona | 20–300 screens, several boards and roles |
+| Starts from | `_template/*-starter.html` (one HTML file) | `_template/studio/` (a project folder with an engine) |
+| Design system | A theme preset from `design-tokens.js` | Its own token set (OKLCH ramps, contrast-checked) + a design-system board (B0) |
+| Built by | You, in this session | You (reference chapter) + parallel builder agents + independent auditor agents |
+| Example | `Example/Example_UI_Board.html` | `Example-Studio/` (Fernly — open `Boards/index.html`) |
+
+When the user describes a product and asks for "the design system", "all the screens" or "the full boards", run **`/studio`** — it holds the whole workflow (brief → tokens → B0 → page inventory → reference chapter → builders → audits → final QA → hub). Everything below this section describes the quick-board path; the narrative rules (ChapterBand title/lede/lane), the premium-feel rules, the anti-slop rules and the conversion-first principle apply to both.
+
 ---
 
 ## Pipeline Overview
@@ -47,23 +60,34 @@ aviniti-board-kit/
 │   ├── watch-board-starter.html       ← Apple Watch Ultra frame
 │   ├── PROJECT.md                     ← per-client context file template
 │   ├── REFERENCE_SCRAPER.md           ← pattern for pulling reference-app inspiration
-│   └── _aviniti-logo-base64.txt       ← base64 data URI of NBG-logo.png (embedded in each starter)
+│   ├── _aviniti-logo-base64.txt       ← base64 data URI of NBG-logo.png (embedded in each starter)
+│   └── studio/                        ← scaffold for the Studio path (copy to ClientName/)
+│       ├── BRIEF.md · PAGES.md        ← product brief + page inventory templates
+│       ├── BUILD_SPEC.md · AUDIT_SPEC.md ← rules for builder and auditor agents
+│       ├── Design-System/             ← anchors.mjs (palette) → build-tokens.mjs → tokens.*; src/board.html (B0)
+│       ├── shared/                    ← build.sh + engine: core, kit, devices, board-frame, fixture (FX)
+│       ├── Boards/                    ← index.json (inventory), src/ (board shells, chapter parts, hub)
+│       └── _tools/                    ← build-all, build-part, smoke, capture, verify, pages2index, final-qa, prompts
+│
+├── Example/                           ← quick-board example
+├── Example-Studio/                    ← Studio example (Fernly): built B0 + B1 + hub
 │
 ├── qa/                                ← automated QA tooling (Playwright + axe-core)
 │   ├── README.md                      ← install + usage
 │   ├── package.json
 │   ├── playwright-qa.mjs              ← 9 automated checks + screenshots
 │   ├── axe-audit.mjs                  ← a11y audit, WCAG AA + best-practice
+│   ├── axe-dark.mjs                   ← same audit with the board switched to dark
 │   └── run-qa.mjs                     ← chains both → unified QA_report.md
 │
 ├── .claude/
 │   ├── settings.json                  ← registers the PROJECT.md reminder hook
 │   ├── hooks/project-md-reminder.sh   ← nudges Claude to update PROJECT.md after board edits
-│   └── skills/                        ← brand-from-logo, sync-project, qa, qa-quick
+│   └── skills/                        ← studio, brand-from-logo, sync-project, qa, qa-quick
 │
-└── ClientName/                        ← one folder per client (you create these)
+└── ClientName/                        ← one folder per client (you create these; git-ignored)
     ├── PROJECT.md
-    └── ClientName_Persona_UI_Board.html
+    └── ClientName_Persona_UI_Board.html   (quick board)  — or the studio folder layout
 ```
 
 ---
@@ -73,6 +97,7 @@ aviniti-board-kit/
 ### Skills bundled in this repo (invoke with `/skill-name`)
 | Skill | Purpose |
 |---|---|
+| **/studio** | Full workflow: product description → design system (B0) → page inventory → boards built by parallel agents → audits → final QA → hub |
 | **/brand-from-logo** | Extract palette, mood, and ready-to-paste C block from a client logo image |
 | **/sync-project** | Reconcile a client's PROJECT.md with the PROJECT block inside their board HTML |
 | **/qa** + **/qa-quick** | Full or fast code audits (geared to Flutter / Next.js app repos, not boards — use `qa/` for boards) |
@@ -83,7 +108,7 @@ aviniti-board-kit/
 | **/accessibility** | WCAG 2.2 audit, ARIA patterns, RTL a11y, keyboard nav — fix guidance on top of the axe-core pipeline |
 | **/performance** | Core Web Vitals budgets, CDN loading strategy, font/image/JS optimization |
 | **/huashu-design** | Design Direction Advisor (3 philosophy-grounded concepts when a brief is vague), anti-AI-slop critique. Personal-use license — install it yourself |
-| **/stitch-design** | Generate 3 theme concepts in Google Stitch for a new aesthetic (needs the Stitch MCP) |
+| **/stitch-design** | Generate 3 theme concepts in Google Stitch for a new aesthetic (needs the Stitch MCP; browse `npx skills add google-labs-code/stitch-skills -l`) |
 
 ### Optional MCPs
 | MCP | Purpose |

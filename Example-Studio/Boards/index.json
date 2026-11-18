@@ -1,0 +1,68 @@
+{
+ "hub": {
+  "src": "Boards/src/index.html",
+  "file": "index.html"
+ },
+ "boards": [
+  {
+   "id": "B0",
+   "file": "B0-design-system.html",
+   "src": "Design-System/src/board.html",
+   "name": "Design system",
+   "nameAr": "النظام البصري",
+   "short": "DS",
+   "icon": "layers",
+   "blurb": "Fern green on warm paper, terracotta for the pot: tokens, type, every component and shell in Arabic and English.",
+   "status": "built",
+   "screens": []
+  },
+  {
+   "id": "B1",
+   "file": "B1-customer-app.html",
+   "src": "Boards/src/B1.html",
+   "name": "Customer app",
+   "nameAr": "تطبيق العملاء",
+   "short": "Customer",
+   "icon": "sprout",
+   "blurb": "Shop, plant detail, checkout with a delivery slot, and tracking that ends in watering reminders.",
+   "status": "built",
+   "screens": [
+    {
+     "id": "1.1",
+     "name": "Shop",
+     "nameAr": "المتجر",
+     "v": "v1",
+     "device": "phone"
+    },
+    {
+     "id": "1.2",
+     "name": "Plant detail",
+     "nameAr": "تفاصيل النبتة",
+     "v": "v1",
+     "device": "desktop"
+    },
+    {
+     "id": "1.2p",
+     "name": "Plant detail · phone",
+     "nameAr": "تفاصيل النبتة",
+     "v": "v1",
+     "device": "phone"
+    },
+    {
+     "id": "1.3",
+     "name": "Checkout",
+     "nameAr": "إتمام الطلب",
+     "v": "v1",
+     "device": "phone"
+    },
+    {
+     "id": "1.4",
+     "name": "Order on its way",
+     "nameAr": "طلبك في الطريق",
+     "v": "v1",
+     "device": "phone"
+    }
+   ]
+  }
+ ]
+}

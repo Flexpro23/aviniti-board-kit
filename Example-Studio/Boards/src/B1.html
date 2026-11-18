@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Board</title>
+/* @inline shared/src/head.html */
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel" data-presets="react">
+/* @inline shared/src/fixture.js */
+/* @inline shared/src/core.jsx */
+/* @inline shared/src/kit.jsx */
+/* @inline shared/src/devices.jsx */
+/* @inline shared/src/board-frame.jsx */
+const BOARDS_INDEX = /*__BOARDS_INDEX__*/;
+window.BOARD_PARTS = window.BOARD_PARTS || {};
+// ═══ Chapter parts (one file per builder; each registers window.BOARD_PARTS.B1[n]) ═══
+/* @inline Boards/src/B1-ch01.jsx */
+
+// One entry per chapter, in board order. Chapters without a registered part are skipped, so parallel builders can land
+// their files one at a time. screens = frames in the chapter (ScreenFrames, phone variants included).
+const CHAPTERS = [
+  { num: 1, name: 'Order a plant', screens: 5 },
+];
+const App = () => {
+  const parts = window.BOARD_PARTS.B1 || {};
+  const present = CHAPTERS.filter(c => parts[c.num]);
+  const total = present.reduce((a, c) => a + c.screens, 0);
+  return <BoardApp board="B1 CUSTOMER APP" title={`${FX.project.name} · Customer app`} subtitle="Phone + web shop · order, deliver, remind · AR + EN" index={BOARDS_INDEX} chapters={present} zoom0={0.22}>
+    <BoardIntro title="From the shelf to the windowsill, with the watering on the calendar." sub={FX.project.tagline.en} stats={[[String(total), 'screens, each in Arabic and English'], [String(present.length), 'chapters']]}
+      points={['Each screen is drawn twice: Arabic right-to-left on the left, English left-to-right on the right. Same layout, mirrored.', 'Phone frames are the customer app; browser frames are the same step on the web shop at 1440 px. A "p" after a number marks the phone version of a desktop screen.', 'Numbered badges on a screen are callouts; the legend under the frame explains them. "Leads to" chips link to the next screen.', 'Dashed boxes are states of the same screen: empty, loading, offline, error.']} />
+    {present.map(c => { const Ch = parts[c.num]; return <Ch key={c.num} />; })}
+  </BoardApp>;
+};
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+{
+ "hub": { "src": "Boards/src/index.html", "file": "index.html" },
+ "boards": [
+  { "id": "B0", "file": "B0-design-system.html", "src": "Design-System/src/board.html", "name": "Design system", "nameAr": "النظام البصري", "short": "DS", "icon": "layers", "blurb": "Tokens, type, every kit component and every app shell, in Arabic and English.", "status": "built", "screens": [] },
+  { "id": "B1", "file": "B1-app.html", "src": "Boards/src/B1.html", "name": "App", "nameAr": "التطبيق", "short": "App", "icon": "smartphone", "blurb": "The main app, chapter by chapter.", "status": "built", "screens": [
+   { "id": "1.1", "name": "Home", "nameAr": "الرئيسية", "v": "v1", "device": "phone" }
+  ] }
+ ]
+}

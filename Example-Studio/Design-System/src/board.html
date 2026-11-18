@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Design system</title>
+/* @inline shared/src/head.html */
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel" data-presets="react">
+/* @inline shared/src/fixture.js */
+/* @inline shared/src/core.jsx */
+/* @inline shared/src/kit.jsx */
+/* @inline shared/src/devices.jsx */
+/* @inline shared/src/board-frame.jsx */
+const BOARDS_INDEX = /*__BOARDS_INDEX__*/;
+// ═══ Design-system board (B0) ═══════════════════════════════════════════════════════════════════════════════
+// Data-driven: it reads only the engine keys of FX (project, people, user, status, currencies, nav) and TOKENS, so it renders
+// for any project as soon as the fixture and anchors are filled. Every kit component and shell appears here in Arabic and
+// English; switch the board to dark to see the dark theme. Specimen copy is generic UI wording on purpose.
+
+// ── DS-only helpers (prefixed Ds so they never collide with kit names) ──────
+const DsCard = ({ title, sub, children, w, style, pad = 24 }) => {
+  const C = useC();
+  return <div style={{ width: w, background: C.surface, border: `1px solid ${C.border}`, borderRadius: 18, boxShadow: C.el[1], overflow: 'hidden', minWidth: 0, ...style }}>
+    {title && <div style={{ padding: '14px 24px', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'baseline', gap: 12, flexWrap: 'wrap' }}><span style={{ fontFamily: FONT, fontSize: 16, fontWeight: 650, color: C.text }}>{title}</span>{sub && <span style={{ fontFamily: FONT, fontSize: 13, color: C.textSecondary }}>{sub}</span>}</div>}
+    <div style={{ padding: pad }}>{children}</div>
+  </div>;
+};
+// The same specimen in Arabic (RTL) and English (LTR), side by side (or stacked with col).
+const DsBoth = ({ children, gap = 36, col, style }) => {
+  const C = useC();
+  return <div style={{ display: 'grid', gridTemplateColumns: col ? '1fr' : '1fr 1fr', gap, ...style }}>
+    {['ar', 'en'].map(l => <div key={l} lang={l} dir={l === 'ar' ? 'rtl' : 'ltr'} style={{ minWidth: 0, textAlign: 'start' }}>
+      <div style={{ fontFamily: MONO, fontSize: 11, fontWeight: 700, letterSpacing: '.08em', color: C.textSecondary, marginBottom: 12 }} dir="ltr">{l === 'ar' ? 'AR · RTL' : 'EN · LTR'}</div>
+      <LangProvider lang={l}>{children}</LangProvider>
+    </div>)}
+  </div>;
+};
+const DsGrid = ({ cols = 3, gap = 24, children, style }) => <div style={{ display: 'grid', gridTemplateColumns: typeof cols === 'number' ? `repeat(${cols}, minmax(0,1fr))` : cols, gap, alignItems: 'start', ...style }}>{children}</div>;
+const DsLabel = ({ children }) => { const C = useC(); return <div style={{ fontFamily: MONO, fontSize: 11.5, fontWeight: 700, color: C.textSecondary, letterSpacing: '.04em', marginBottom: 8 }} dir="ltr">{children}</div>; };
+// A stage for absolutely positioned overlays (Dialog, Sheet, SidePanel and Toast sit on a scrim that fills the parent).
+const DsStage = ({ children, h = 360, w, style }) => { const C = useC(); return <div style={{ position: 'relative', height: h, width: w, borderRadius: 16, overflow: 'hidden', background: C.bg, border: `1px solid ${C.border}`, ...style }}>{children}</div>; };
+const DsWrap = ({ children }) => <div style={{ display: 'flex', flexDirection: 'column', gap: 28, width: '100%' }}>{children}</div>;
+// Theme well: renders children under an explicit theme so light and dark tokens can sit side by side.
+const DsTheme = ({ name, children }) => { const T = mkTheme(name); return <ThemeCtx.Provider value={T}><div style={{ padding: 20, borderRadius: 16, background: T.bg, border: `1px solid ${T.border}` }}><div style={{ fontFamily: MONO, fontSize: 11.5, fontWeight: 700, letterSpacing: '.08em', color: T.textSecondary, marginBottom: 14 }}>{name.toUpperCase()} THEME</div>{children}</div></ThemeCtx.Provider>; };
+const ROLE_ORDER = ['primary', 'accent', 'neutral', 'danger', 'warning', 'success', 'info'];
+const scaleNames = () => [...ROLE_ORDER, ...Object.keys(TOKENS.scales).filter(k => !ROLE_ORDER.includes(k))];
+const statusEntries = () => Object.entries(FX.status || {}).flatMap(([kind, m]) => Object.keys(m).map(s => [kind, s]));
+
+// ── Cover ────────────────────────────────────────────────────────────────────
+const Cover = () => {
+  const C = useC(); const S = TOKENS.scales;
+  return <section id="cover" aria-label="Design system cover" style={{ width: CHW, marginBottom: 140, borderRadius: 28, overflow: 'hidden', boxShadow: C.el[3], display: 'grid', gridTemplateColumns: '1.2fr 1fr', minHeight: 640, background: C.name === 'dark' ? C.surface : S.primary[800] }}>
+    <div style={{ padding: '72px 80px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 40 }}>
+      <Wordmark size={64} ar={false} ink={S.neutral[50]} markBg={S.neutral[50]} markInk={S.primary[800]} />
+      <div>
+        <div style={{ fontFamily: MONO, fontSize: 14, fontWeight: 700, letterSpacing: '.12em', color: S.accent[200] }}>DESIGN SYSTEM · {TOKENS.version}</div>
+        <h1 style={{ fontFamily: DISPLAY, fontWeight: 600, fontSize: 88, lineHeight: '92px', color: S.neutral[50], margin: '14px 0 0', letterSpacing: '-0.015em' }}>{FX.project.tagline.en}</h1>
+        <p lang="ar" dir="rtl" style={{ fontFamily: DISPLAY_AR, fontSize: 34, lineHeight: '52px', color: S.primary[100], marginTop: 18, textAlign: 'start' }}>{FX.project.tagline.ar}</p>
+      </div>
+      <div style={{ fontFamily: FONT, fontSize: 16, color: S.primary[100] }}>Tokens, type, every kit component and every app shell, in Arabic and English. {FX.project.boardDate}</div>
+    </div>
+    <div style={{ padding: '72px 64px', background: C.name === 'dark' ? C.surface2 : S.primary[900], display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 18, alignContent: 'center' }}>
+      {ROLE_ORDER.map(k => <div key={k} style={{ borderRadius: 18, overflow: 'hidden', border: `1px solid ${hexAlpha(S.neutral[50], 0.2)}` }}>
+        <div aria-hidden="true" style={{ height: 86, display: 'grid', gridTemplateColumns: 'repeat(5,1fr)' }}>{[200, 400, 500, 700, 900].map(st => <span key={st} style={{ background: S[k][st] }} />)}</div>
+        <div style={{ padding: '10px 14px', fontFamily: MONO, fontSize: 13, color: S.neutral[50], display: 'flex', justifyContent: 'space-between' }}><span>{k}</span><span>{S[k][k === 'accent' ? 500 : 700]}</span></div>
+      </div>)}
+    </div>
+  </section>;
+};
+const hexAlpha = (h, a) => `rgba(${parseInt(h.slice(1, 3), 16)},${parseInt(h.slice(3, 5), 16)},${parseInt(h.slice(5, 7), 16)},${a})`;
+
+// ── 1 · Colour ───────────────────────────────────────────────────────────────
+const SemanticChips = () => {
+  const C = useC();
+  const keys = ['bg', 'surface', 'surface2', 'surfaceSunken', 'surfaceSelected', 'border', 'borderStrong', 'text', 'textSecondary', 'textFaint', 'primary', 'primarySubtle', 'primaryText', 'accent', 'accentSubtle', 'accentText', 'alert', 'alertSubtle', 'warning', 'warningSubtle', 'success', 'successSubtle', 'info', 'infoSubtle', 'focus', 'controlBorder', 'inverse', 'photo'];
+  return <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0,1fr))', gap: 10 }}>{keys.map(k => <div key={k} style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
+    <span aria-hidden="true" style={{ width: 34, height: 34, borderRadius: 8, background: C[k], border: `1px solid ${C.border}`, flexShrink: 0 }} />
+    <span style={{ minWidth: 0 }}><span style={{ display: 'block', fontFamily: FONT, fontSize: 13, fontWeight: 600, color: C.text, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{k}</span><span style={{ display: 'block', fontFamily: MONO, fontSize: 11, color: C.textSecondary, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{C[k]}</span></span>
+  </div>)}</div>;
+};
+const ContrastTable = ({ theme }) => {
+  const C = useC(); const rows = TOKENS.contrast.pairs[theme]; const nt = TOKENS.contrast.nonText[theme];
+  const cell = { fontFamily: MONO, fontSize: 12, padding: '3px 0', color: C.textSecondary, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' };
+  return <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 56px 46px', columnGap: 10 }}>
+    {['foreground', 'background', 'ratio', 'min'].map(h => <div key={h} style={{ ...cell, fontWeight: 700, borderBottom: `1px solid ${C.border}` }}>{h}</div>)}
+    {[...rows.map(r => [r.fg, r.bg, r.ratio, r.fg === 'textDisabled' ? '—' : '4.5']), ...nt.map(r => [r.fg, r.bg, r.ratio, '3'])].map((r, i) => <Fragment key={i}>{r.map((v, j) => <div key={j} style={{ ...cell, color: j === 2 ? C.text : C.textSecondary, fontWeight: j === 2 ? 700 : 400 }}>{v}</div>)}</Fragment>)}
+  </div>;
+};
+const S1 = () => {
+  const C = useC(); const S = TOKENS.scales;
+  return <ChapterBand num={1} name="Colour" nameAr="الألوان" title="One ramp per role, generated, then checked." lede="Every ramp is built in OKLCH from one anchor; the themes read fixed steps from it, and the build fails if any pair misses its contrast." lane="Light reads step 700 for primary and status colours and 500 for the accent; dark reads 200 to 400. Pairs are composited over their real surface before the ratio is taken.">
+    <DsWrap>
+      <DsCard title="Ramps" sub="50 → 950 · anchor pinned at its step">
+        <div style={{ display: 'grid', gridTemplateColumns: '160px repeat(11, minmax(0,1fr))', gap: 8, alignItems: 'center' }}>
+          <span />{[50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950].map(st => <span key={st} style={{ fontFamily: MONO, fontSize: 12, color: C.textSecondary, textAlign: 'center' }}>{st}</span>)}
+          {scaleNames().map(k => <Fragment key={k}><span style={{ fontFamily: MONO, fontSize: 13, fontWeight: 700, color: C.text }}>{k.replace(/^cat_/, 'category · ')}</span>
+            {[50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950].map(st => <span key={st} style={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'stretch' }}><span aria-hidden="true" style={{ height: 44, borderRadius: 8, background: S[k][st], border: `1px solid ${C.border}` }} /><span style={{ fontFamily: MONO, fontSize: 10.5, color: C.textSecondary, textAlign: 'center' }}>{S[k][st]}</span></span>)}</Fragment>)}
+        </div>
+      </DsCard>
+      <DsGrid cols={2}>
+        <DsTheme name="light"><SemanticChips /></DsTheme>
+        <DsTheme name="dark"><SemanticChips /></DsTheme>
+      </DsGrid>
+      <DsGrid cols={2}>
+        <DsTheme name="light"><ContrastTable theme="light" /></DsTheme>
+        <DsTheme name="dark"><ContrastTable theme="dark" /></DsTheme>
+      </DsGrid>
+      {TOKENS.catMap.length > 0 && <DsCard title="Categories" sub="chips, row groups and charts by category · text ≥ 4.5:1 on its tint"><DsBoth><Row gap={10} wrap>{TOKENS.catMap.map(k => <Pill key={k} tone={k}>{k}</Pill>)}{TOKENS.catMap.map(k => <Chip key={'c' + k} on tone={k}>{k}</Chip>)}</Row></DsBoth></DsCard>}
+      <DsCard title="Chart series" sub="≥ 3:1 on the surface · ≥ 10 ΔE apart"><Row gap={16}>{C.chart.map((c, i) => <Row key={i} gap={8}><span aria-hidden="true" style={{ width: 48, height: 14, borderRadius: 4, background: c }} /><span style={{ fontFamily: MONO, fontSize: 12, color: C.textSecondary }}>{i} · {c}</span></Row>)}</Row></DsCard>
+    </DsWrap>
+  </ChapterBand>;
+};
+
+// ── 2 · Type ─────────────────────────────────────────────────────────────────
+const TypeRows = () => {
+  const C = useC(); const { $, isAr } = useL();
+  return <Col gap={14}>{Object.keys(TOKENS.type.scale).map(k => { const st = ts(k, isAr); return <Row key={k} gap={16} align="baseline">
+    <span dir="ltr" style={{ width: 150, flexShrink: 0, fontFamily: MONO, fontSize: 12, color: C.textSecondary }}>{k} · {st.fontSize}/{parseInt(st.lineHeight)}</span>
+    <Tx r={k} style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{k.startsWith('money') ? <Money v={1250.5} r={k} /> : k.startsWith('mono') ? 'ORD-2026-0417' : $('خط واضح يُقرأ بسهولة', 'Clear type that reads at a glance')}</Tx>
+  </Row>; })}</Col>;
+};
+const S2 = () => <ChapterBand num={2} name="Type" nameAr="الخط" title="One scale, two scripts." lede="Arabic gets four pixels more line height, one pixel more size with a 13 px floor, no tracking and never capitals." lane="Figures, codes and amounts use tabular numbers and stay left-to-right isolates inside Arabic text. Display roles use the display face; everything else the UI face.">
+  <DsWrap><DsCard title="Type roles" sub={`${TOKENS.type.family.display.split(',')[0]} · ${TOKENS.type.family.ui.split(',')[0]} · ${TOKENS.type.family.ar.split(',')[0]} · ${TOKENS.type.family.mono.split(',')[0]}`}><DsBoth><TypeRows /></DsBoth></DsCard></DsWrap>
+</ChapterBand>;
+
+// ── 3 · Icons ────────────────────────────────────────────────────────────────
+const S3 = () => {
+  const C = useC(); const names = Object.keys(ICONS);
+  return <ChapterBand num={3} name="Icons" nameAr="الأيقونات" title="A 24 grid, one stroke weight." lede={`${names.length} icons at 1.75 stroke. Direction icons flip in Arabic; icons with digits get their own Arabic drawing.`} lane="Icons never carry meaning alone: every status pairs an icon with a word, and every icon button has an accessible name.">
+    <DsWrap>
+      <DsCard title="Set" sub="name under each icon">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(16, minmax(0,1fr))', gap: 10 }}>{names.map(n => <div key={n} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '12px 4px', borderRadius: 10, background: C.surface2, color: C.text }}><Ic n={n} s={24} /><span style={{ fontFamily: MONO, fontSize: 10.5, color: C.textSecondary, maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{n}</span></div>)}</div>
+      </DsCard>
+      <DsCard title="Mirroring" sub="the same icons under each language"><DsBoth><Row gap={14} wrap style={{ color: C.text }}>{[...MIRROR, 'queue'].map(n => <Ic key={n} n={n} s={24} />)}</Row></DsBoth></DsCard>
+    </DsWrap>
+  </ChapterBand>;
+};
+
+// ── 4 · Buttons and controls ─────────────────────────────────────────────────
+const Buttons = () => {
+  const { $ } = useL();
+  const vs = [['primary', $('حفظ', 'Save'), 'check'], ['secondary', $('إلغاء', 'Cancel')], ['tonal', $('إضافة', 'Add'), 'plus'], ['ghost', $('تعديل', 'Edit'), 'edit'], ['quiet', $('المزيد', 'More'), 'moreH'], ['link', $('عرض الكل', 'View all')], ['accent', $('ابدأ الآن', 'Get started'), 'arrowR'], ['warn', $('مراجعة', 'Review'), 'alert'], ['danger', $('حذف', 'Delete'), 'trash'], ['dangerGhost', $('إزالة', 'Remove')]];
+  return <Col gap={16}>
+    <Row gap={10} wrap>{vs.map(([v, l, i]) => <Btn key={v} v={v} icon={i}>{l}</Btn>)}</Row>
+    <Row gap={10} wrap align="flex-end">{['xs', 'sm', 'md', 'lg', 'xl'].map(s => <Btn key={s} size={s}>{s}</Btn>)}<Btn icon="plus" label={$('إضافة', 'Add')} /></Row>
+    <Row gap={10} wrap><Btn pressed>{$('مضغوط', 'Pressed')}</Btn><Btn loading>{$('جارٍ الحفظ', 'Saving')}</Btn><Btn disabled>{$('غير متاح', 'Unavailable')}</Btn><Btn v="secondary" badge={3} icon="bell">{$('التنبيهات', 'Alerts')}</Btn><Btn full v="secondary" iconEnd="chevR">{$('بعرض كامل', 'Full width')}</Btn></Row>
+    <Row gap={8} wrap>{['ghost', 'secondary', 'tonal', 'quiet', 'primary'].map(v => <IconBtn key={v} v={v} icon="settings" label={v} />)}<IconBtn icon="bell" label={$('الإشعارات', 'Notifications')} badge={4} /><IconBtn icon="heart" label={$('مفضلة', 'Favourite')} pressed /><IconBtn icon="trash" label={$('حذف', 'Delete')} disabled size={32} /><IconBtn icon="x" label={$('إغلاق', 'Close')} size={44} /></Row>
+  </Col>;
+};
+const Choice = () => {
+  const { $ } = useL(); const L_ = ({ el, l }) => <Row gap={10}>{el}<Tx r="body">{l}</Tx></Row>;
+  return <Col gap={16}>
+    <Segmented value={0} items={[{ label: $('الكل', 'All'), count: 12 }, { label: $('النشطة', 'Active'), count: 8 }, { label: $('المنتهية', 'Done') }]} />
+    <Segmented full size="lg" value={1} items={[{ label: $('يوم', 'Day'), icon: 'calendar' }, { label: $('أسبوع', 'Week') }, { label: $('شهر', 'Month') }]} />
+    <Row gap={8} wrap><Chip on>{$('المختارة', 'Selected')}</Chip><Chip count={4}>{$('بعدد', 'With count')}</Chip><Chip icon="filter" iconEnd="chevD">{$('تصفية', 'Filter')}</Chip><Chip disabled>{$('معطلة', 'Disabled')}</Chip>{TOKENS.catMap[0] && <Chip on tone={TOKENS.catMap[0]}>{TOKENS.catMap[0]}</Chip>}</Row>
+    <Tabs value={1} items={[{ label: $('نظرة عامة', 'Overview') }, { label: $('النشاط', 'Activity'), count: 3 }, { label: $('الملفات', 'Files'), icon: 'paperclip' }]} />
+    <DsGrid cols={3} gap={10}>
+      <L_ el={<Toggle on />} l={$('مفعّل', 'On')} /><L_ el={<Toggle />} l={$('متوقف', 'Off')} /><L_ el={<Toggle disabled />} l={$('معطل', 'Disabled')} />
+      <L_ el={<Check on />} l={$('محدد', 'Checked')} /><L_ el={<Check mixed />} l={$('جزئي', 'Mixed')} /><L_ el={<Check disabled />} l={$('معطل', 'Disabled')} />
+      <L_ el={<Radio on />} l={$('مختار', 'Chosen')} /><L_ el={<Radio />} l={$('غير مختار', 'Not chosen')} /><L_ el={<Check on tone="success" />} l={$('تم', 'Done')} />
+    </DsGrid>
+  </Col>;
+};
+const S4 = () => <ChapterBand num={4} name="Buttons and controls" nameAr="الأزرار وعناصر التحكم" title="Every tap target is 44 px, whatever it looks like." lede="Buttons are 40 px by default; anything drawn smaller carries an invisible hit area that extends it to 44." lane="One primary action per view. Accent is for one brand moment, danger only for destructive actions. Pressed, loading and disabled are static states for mockups.">
+  <DsWrap><DsGrid cols={2}><DsCard title="Btn · IconBtn"><DsBoth col gap={24}><Buttons /></DsBoth></DsCard><DsCard title="Segmented · Chip · Tabs · Toggle · Check · Radio"><DsBoth col gap={24}><Choice /></DsBoth></DsCard></DsGrid></DsWrap>
+</ChapterBand>;
+
+// ── 5 · Inputs ───────────────────────────────────────────────────────────────
+const Inputs = () => {
+  const { $ } = useL(); const p = FX.person(FX.user) || FX.people[0];
+  return <DsGrid cols={3} gap={18}>
+    <Field label={$('الاسم', 'Name')} placeholder={$('اكتب الاسم', 'Type a name')} required />
+    <Field label={$('الاسم', 'Name')} value={$(p.name.ar, p.name.en)} focus />
+    <Field label={$('البريد الإلكتروني', 'Email')} value="name@example" warn={$('أكمل عنوان البريد', 'Finish the email address')} dir="ltr" />
+    <Field label={$('الرقم المرجعي', 'Reference')} value="REF-2026-0042" mono readOnly />
+    <Field label={$('الخطة', 'Plan')} value={$('سنوية', 'Yearly')} disabled />
+    <Field label={$('الكمية', 'Quantity')} value="12" suffix={$('قطعة', 'pcs')} prefix="#" />
+    <Field label={$('ملاحظة', 'Note')} multiline value={$('سطر أول من الملاحظة يلتف إلى سطر ثانٍ حين يطول.', 'A first line of the note that wraps to a second line when it runs long.')} />
+    <Search placeholder={$('ابحث بالاسم أو الرقم', 'Search by name or number')} kbd="sliders" />
+    <Search value={$('بحث', 'search')} clear size="lg" />
+    <MoneyField label={$('المبلغ', 'Amount')} v={25.5} focus />
+    <MoneyField label={$('نقداً', 'Cash')} v={30} tendered={30} change={4.5} hint={$('المطلوب', 'Due') + ' 25.500'} />
+    <MoneyField label={$('بالدولار', 'In dollars')} v={null} cur={FX.currencies[1] ? FX.currencies[1].code : FX.cur} warn={$('أدخل المبلغ', 'Enter the amount')} />
+    <PhoneField label={$('الهاتف', 'Phone')} v="79 000 0000" verified />
+    <PhoneField label={$('الهاتف', 'Phone')} focus />
+    <DateTimeField label={$('الموعد', 'When')} date={FX.now.date} time={FX.now.time} tz="UTC+3" required />
+    <OTPField filled={3} timer={42} label={$('رمز التحقق', 'Verification code')} />
+    <OTPField filled={6} error focus={false} timer={0} />
+    <PINField filled={2} label={$('أدخل الرمز', 'Enter your PIN')} />
+    <Combobox label={$('اختر', 'Choose')} value={$('الخيار', 'Opt')} open highlight={1} options={[{ l: $('الخيار الأول', 'Option one'), icon: 'star' }, { l: $('الخيار الثاني', 'Option two'), sub: $('وصف قصير', 'Short description'), selected: true }, $('الخيار الثالث', 'Option three')]} />
+    <Col gap={14}><QtyStepper v={1} min={1} label={$('العدد', 'Count')} /><QtyStepper v={3} max={3} unit="×" /><PINField filled={4} error /></Col>
+    <Col gap={14}><FileDropzone label={$('مرفق', 'Attachment')} /><FileDropzone state="uploading" pct={64} name="document-scan.pdf" /></Col>
+    <Col gap={14}><FileDropzone state="done" name="document-scan.pdf" /><FileDropzone state="error" name="photo-02.jpg" /></Col>
+  </DsGrid>;
+};
+const S5 = () => <ChapterBand num={5} name="Inputs" nameAr="الحقول" title="Problems are amber; red means it went wrong." lede="A field shows its placeholder, value, focus, warning, read-only and disabled states the same way everywhere." lane="Phone numbers, amounts and codes are entered left-to-right inside Arabic forms. Money fields put the currency code first and end-align the amount.">
+  <DsWrap><DsCard title="Field · Search · MoneyField · PhoneField · DateTimeField · OTPField · PINField · Combobox · QtyStepper · FileDropzone"><DsBoth gap={48}><Inputs /></DsBoth></DsCard></DsWrap>
+</ChapterBand>;
+
+// ── 6 · Status and feedback ──────────────────────────────────────────────────
+const Status = () => {
+  const C = useC(); const { $ } = useL(); const tones = ['neutral', 'primary', 'accent', 'success', 'warning', 'alert', 'info'];
+  return <Col gap={16}>
+    <Row gap={8} wrap>{tones.map(t => <Pill key={t} tone={t}>{t}</Pill>)}</Row>
+    <Row gap={8} wrap>{tones.map(t => <Pill key={t} tone={t} solid>{t}</Pill>)}</Row>
+    <Row gap={8} wrap>{tones.map(t => <Pill key={t} tone={t} outline size="sm">{t}</Pill>)}<Pill tone="success" pulse>{$('مباشر', 'Live')}</Pill><Pill tone="info" icon="clock" size="lg">{$('قريباً', 'Soon')}</Pill></Row>
+    <Row gap={8} wrap>{statusEntries().map(([k, s]) => <StatusPill key={k + s} kind={k} s={s} />)}</Row>
+    <Row gap={8} wrap><StatusPill kind={statusEntries()[0][0]} s={statusEntries()[0][1]} extra="2 h" /><StatusPill kind={statusEntries()[0][0]} s={statusEntries()[0][1]} solid size="sm" /></Row>
+    {['info', 'success', 'warning', 'alert', 'accent'].map(t => <Banner key={t} tone={t} title={{ info: $('للعلم', 'For your information'), success: $('تم الحفظ', 'Saved'), warning: $('راجع الحقول', 'Check the fields'), alert: $('لم يكتمل الطلب', 'The request did not go through'), accent: $('جديد', 'New') }[t]} body={$('سطر يشرح ما حدث وما الخطوة التالية.', 'One line on what happened and what to do next.')} action={t === 'alert' ? <Btn v="secondary" size="sm">{$('حاول مجدداً', 'Try again')}</Btn> : undefined} />)}
+    <Banner compact tone="neutral" body={$('شريط مضغوط بلا عنوان', 'A compact banner with no title')} />
+  </Col>;
+};
+const Feedback = () => {
+  const C = useC(); const { $ } = useL();
+  return <Col gap={16}>
+    <Card pad={0}><Empty title={$('لا شيء هنا بعد', 'Nothing here yet')} body={$('ستظهر العناصر هنا حين تضيف أولها.', 'Items show up here once you add the first one.')} action={<Btn icon="plus">{$('إضافة', 'Add')}</Btn>} /></Card>
+    <Card><Col gap={10}><Skel w="40%" h={18} /><Skel /><Skel w="80%" /><Row gap={10}><Skel w={40} h={40} r={20} /><Col gap={6} style={{ flex: 1 }}><Skel w="60%" /><Skel w="30%" h={12} /></Col></Row></Col></Card>
+    <Col gap={8}><Progress v={0.35} /><Progress v={0.7} tone="success" h={8} /><Progress v={0.9} tone="warning" /></Col>
+    <Steps at={1} items={[$('التفاصيل', 'Details'), $('المراجعة', 'Review'), $('التأكيد', 'Confirm')]} />
+    <Steps at={2} error={2} items={[$('التفاصيل', 'Details'), $('المراجعة', 'Review'), $('الدفع', 'Payment')]} />
+    <Row gap={14}><Dot c={C.success} pulse /><Dot c={C.warning} /><Dot c={C.alert} s={10} /><Spinner c={C.primary} /><Tx r="bodySm" c={C.textSecondary}>{$('نقاط ومؤشر تحميل', 'Dots and a spinner')}</Tx></Row>
+    <Toast style={{ position: 'static', transform: 'none' }} action={$('تراجع', 'Undo')}>{$('تم نقل العنصر إلى الأرشيف.', 'Item moved to the archive.')}</Toast>
+    <Toast style={{ position: 'static', transform: 'none' }} tone="alert" icon="alertCircle">{$('تعذّر الإرسال. لا يوجد اتصال.', 'Could not send. No connection.')}</Toast>
+  </Col>;
+};
+const S6 = () => <ChapterBand num={6} name="Status and feedback" nameAr="الحالة والتنبيهات" title="A word and an icon, never colour alone." lede="Status chips come from one vocabulary in the fixture, so every board says the same thing the same way." lane="Banners carry one line of explanation and at most one action. Empty states say what will appear and offer the first action. Skeletons match the layout they replace.">
+  <DsWrap><DsGrid cols={2}><DsCard title="Pill · StatusPill · Banner"><DsBoth col gap={28}><Status /></DsBoth></DsCard><DsCard title="Empty · Skel · Progress · Steps · Dot · Spinner · Toast"><DsBoth gap={28}><Feedback /></DsBoth></DsCard></DsGrid></DsWrap>
+</ChapterBand>;
+
+// ── 7 · Data display ─────────────────────────────────────────────────────────
+const Figures = () => {
+  const C = useC(); const { $, tr } = useL(); const ids = FX.people.map(p => p.id); const p = FX.person(FX.user) || FX.people[0];
+  return <Col gap={16}>
+    <Row gap={18} wrap align="baseline">{FX.currencies.map(c => <Money key={c.code} v={1234.5} cur={c.code} />)}<Money v={-12} /><Money v={8} sign c={C.successText} /><Money v={40} strike r="bodySm" c={C.textSecondary} /><Money v={86.25} r="moneyL" /></Row>
+    <Money v={1250} r="moneyXL" />
+    <Row gap={18} wrap><Num>REF-2026-0042</Num><Time t={FX.now.time} /><Phone v="+962 79 000 0000" wa /></Row>
+    <Row gap={12} wrap>{[24, 32, 40, 56].map(s => <Avatar key={s} ini={tr(p.ini)} name={tr(p.name)} size={s} />)}<Avatar ini="?" tone="neutral" size={40} /><Avatar src name={tr(p.name)} size={40} status="on" /><Avatar ini={tr(p.ini)} size={40} status="busy" /><AvatarStack items={[...ids, ...ids, ...ids]} max={4} /></Row>
+    <Row gap={10} wrap>{['neutral', 'primary', 'accent', 'success', 'warning', 'alert', 'info'].map(t => <IconTile key={t} n="sprout" tone={t} />)}<IconTile n="star" tone="primary" size={56} /></Row>
+    <QR seed={FX.project.name} size={128} />
+  </Col>;
+};
+const Containers = () => {
+  const C = useC(); const { $, tr } = useL(); const p = FX.person(FX.user) || FX.people[0];
+  return <Col gap={16}>
+    <KpiRow items={[{ label: $('اليوم', 'Today'), value: '24', delta: { up: true, t: '+12%' }, icon: 'calendar' }, { label: $('المبيعات', 'Sales'), value: <Money v={1840} r="moneyXL" />, sub: $('هذا الأسبوع', 'this week') }, { label: $('متأخر', 'Late'), value: '3', tone: 'alert', delta: { down: true, t: '−2' } }, { label: $('جارٍ', 'Loading'), loading: true }]} />
+    <Card pad={0}>
+      <div style={{ padding: '16px 16px 0' }}><SectionHead title={$('القائمة', 'List')} sub={$('أحدث العناصر', 'Latest items')} action={<Btn v="link" size="sm">{$('عرض الكل', 'View all')}</Btn>} /></div>
+      <LRow lead={<Avatar ini={tr(p.ini)} name={tr(p.name)} />} title={tr(p.name)} sub={tr(p.role)} trail={<Money v={25.5} />} chev />
+      <LRow lead={<IconTile n="file" tone="info" />} title={$('سطر بعنوان طويل جداً يُختصر عند نهاية السطر', 'A row with a very long title that gets cut off at the end')} sub={$('سطر ثانٍ', 'Second line')} trail={<StatusPill kind={statusEntries()[0][0]} s={statusEntries()[0][1]} />} selected />
+      <LRow lead={<IconTile n="alert" tone="warning" />} title={$('صف بلون', 'Toned row')} tone="warning" divider={false} h={48} />
+    </Card>
+    <DsGrid cols={3} gap={12}><Card><Tx r="bodyStrong">{$('بطاقة', 'Card')}</Tx></Card><Card selected><Tx r="bodyStrong">{$('مختارة', 'Selected')}</Tx></Card><Card tone="info" elev={2}><Tx r="bodyStrong">{$('بلون وظل', 'Tone + shadow')}</Tx></Card></DsGrid>
+    <Card><Over>{$('عنوان علوي', 'Overline')}</Over><Gap h={6} /><Row gap={12}><Box style={{ width: 120 }}><Kpi label={$('منفرد', 'Single KPI')} value="7" pad="10px 12px" /></Box><Grow><Tx r="bodySm" c={C.textSecondary}>{$('Box و Grow و Gap و Divider لترتيب العناصر.', 'Box, Grow, Gap and Divider lay things out.')}</Tx></Grow></Row><Gap h={12} /><Divider /><Gap h={12} /><DL rows={[[$('الرقم', 'Number'), <Num>REF-2026-0042</Num>], [$('التاريخ', 'Date'), FX.now.date.split('-').reverse().join('/')], [$('المسؤول', 'Owner'), tr(p.name)]]} /></Card>
+  </Col>;
+};
+const Tables = () => {
+  const C = useC(); const { $ } = useL(); const st = statusEntries();
+  return <Col gap={16}>
+    <DTable selectable selected={[1]} cols={[{ l: $('العنصر', 'Item'), w: '2fr', sort: 'asc' }, { l: $('الحالة', 'Status'), w: '1.4fr' }, { l: $('المبلغ', 'Amount'), num: true }, { w: '48px' }]}
+      rows={st.slice(0, 4).map(([k, s], i) => [$(`العنصر ${i + 1}`, `Item ${i + 1}`), <StatusPill kind={k} s={s} size="sm" />, <Money v={12.5 * (i + 1)} />, <IconBtn icon="moreV" label={$('المزيد', 'More')} size={32} />])}
+      foot={[$('المجموع', 'Total'), '', <Money v={125} />, '']} />
+    <DTable dense zebra cols={[{ l: $('الوقت', 'Time'), w: '80px' }, { l: $('الحدث', 'Event') }]} rows={[[<Time t="09:10" />, $('تم الإنشاء', 'Created')], [<Time t="09:24" />, $('تم التعديل', 'Edited')], [<Time t="09:30" />, $('تم الإرسال', 'Sent')]]} />
+    <Card><TotalsBlock rows={[{ l: $('المجموع الفرعي', 'Subtotal'), v: 40 }, { l: $('خصم', 'Discount'), v: 4, neg: true, tone: 'success' }, { l: $('التوصيل', 'Delivery'), v: 2.5, muted: true, sub: $('خلال يومين', 'within two days') }]} total={{ l: $('المجموع', 'Total'), v: 38.5 }} after={[{ l: $('مدفوع', 'Paid'), v: 20 }]} balance={{ l: $('المتبقي', 'Balance'), v: 18.5, tone: 'warning' }} /></Card>
+  </Col>;
+};
+const S7 = () => <ChapterBand num={7} name="Data display" nameAr="عرض البيانات" title="Figures read the same in both languages." lede="Amounts put the currency code first; codes, times and phone numbers are left-to-right isolates; tables end-align numbers." lane="Cards have a border, not a shadow. Lists are 56 px on phone and 48 on desktop. A total sits on the sunken ground so the eye lands on it.">
+  <DsWrap>
+    <DsGrid cols={2}><DsCard title="Money · Num · Time · Phone · Avatar · AvatarStack · IconTile · QR"><DsBoth gap={28}><Figures /></DsBoth></DsCard><DsCard title="Kpi · KpiRow · Card · SectionHead · LRow · DL"><DsBoth col gap={28}><Containers /></DsBoth></DsCard></DsGrid>
+    <DsCard title="DTable · TotalsBlock"><DsBoth gap={40}><Tables /></DsBoth></DsCard>
+  </DsWrap>
+</ChapterBand>;
+
+// ── 8 · Overlays ─────────────────────────────────────────────────────────────
+const Overlays = () => {
+  const { $ } = useL();
+  return <DsGrid cols={3} gap={18}>
+    <DsStage h={340}><Dialog w={460} icon="checkCircle" title={$('تأكيد الطلب', 'Confirm the request')} sub={$('سيُرسل الطلب ولا يمكن تعديله بعدها.', 'The request is sent and cannot be edited after.')} foot={<><Btn v="secondary">{$('رجوع', 'Back')}</Btn><Btn>{$('أرسل الطلب', 'Send request')}</Btn></>}><TotalsBlock rows={[{ l: $('العناصر', 'Items'), v: 36 }]} total={{ l: $('المجموع', 'Total'), v: 36 }} /></Dialog></DsStage>
+    <DsStage h={340}><Dialog w={460} tone="alert" icon="trash" title={$('حذف العنصر؟', 'Delete this item?')} sub={$('لا يمكن التراجع عن الحذف.', 'This cannot be undone.')} foot={<><Btn v="secondary">{$('إلغاء', 'Cancel')}</Btn><Btn v="danger">{$('احذف', 'Delete')}</Btn></>} /></DsStage>
+    <DsStage h={340}><SidePanel w={340} title={$('التفاصيل', 'Details')} sub="REF-2026-0042" foot={<Btn>{$('حفظ', 'Save')}</Btn>}><Field label={$('الاسم', 'Name')} value={$('العنصر', 'Item')} /><Field label={$('ملاحظة', 'Note')} placeholder={$('اختياري', 'Optional')} /></SidePanel></DsStage>
+    <DsStage h={420}><Sheet title={$('خيارات', 'Options')} sub={$('اختر واحداً', 'Pick one')} foot={<Btn size="xl" full>{$('متابعة', 'Continue')}</Btn>}><LRow lead={<Radio on />} title={$('الخيار الأول', 'Option one')} pad={0} /><LRow lead={<Radio />} title={$('الخيار الثاني', 'Option two')} pad={0} divider={false} /></Sheet></DsStage>
+    <DsStage h={420}><Scrim style={{ display: 'grid', placeItems: 'center' }}><Spinner s={36} c={useC().onPhoto} /></Scrim><Toast bottom={20} action={$('تراجع', 'Undo')}>{$('تم الحفظ.', 'Saved.')}</Toast></DsStage>
+    <DsStage h={420}><div style={{ position: 'absolute', insetInline: 0, bottom: 0 }}><StickyAction info={<Row justify="space-between"><Tx r="bodySm">{$('3 عناصر', '3 items')}</Tx><Money v={36} /></Row>}><Btn size="xl" full>{$('إتمام الطلب', 'Check out')}</Btn></StickyAction></div><Toast desktop bottom={140} tone="info" icon="info">{$('إشعار سطح المكتب', 'Desktop toast')}</Toast></DsStage>
+  </DsGrid>;
+};
+const S8 = () => <ChapterBand num={8} name="Overlays" nameAr="الطبقات" title="Side sheets on desktop, bottom sheets on phone." lede="A summary dialog names its one primary action; reversible actions use a toast with Undo instead of asking first." lane="Dialogs, sheets and side panels sit on the same scrim. The phone sticky action is 56 px with the summary line above it.">
+  <DsWrap><DsCard title="Dialog · SidePanel · Sheet · Scrim · Toast · StickyAction"><DsBoth gap={40}><Overlays /></DsBoth></DsCard></DsWrap>
+</ChapterBand>;
+
+// ── 9 · App shells ───────────────────────────────────────────────────────────
+const ShellList = () => { const { $ } = useL(); const p = FX.person(FX.user) || FX.people[0]; const { tr } = useL(); return <>
+  <KpiRow cols={2} items={[{ label: $('اليوم', 'Today'), value: '12' }, { label: $('هذا الأسبوع', 'This week'), value: '48' }]} />
+  <Card pad={0}>{statusEntries().slice(0, 4).map(([k, s], i, a) => <LRow key={i} lead={<IconTile n="file" tone="primary" />} title={$(`العنصر ${i + 1}`, `Item ${i + 1}`)} sub={tr(p.name)} trail={<StatusPill kind={k} s={s} size="sm" />} divider={i < a.length - 1} />)}</Card>
+</>; };
+const PhoneRoot = () => { const { $ } = useL(); return <PhoneApp title={$('الرئيسية', 'Home')} active={(FX.nav.phone[0] || {}).id} badges={{ [(FX.nav.phone[3] || {}).id]: 2 }} bell={3}><ShellList /></PhoneApp>; };
+const PhoneChild = () => { const { $ } = useL(); return <PhoneApp back title={$('التفاصيل', 'Details')} sub="REF-2026-0042" bottom={<Btn size="xl" full>{$('متابعة', 'Continue')}</Btn>} banner={<Banner compact tone="warning" body={$('لا يوجد اتصال · بيانات محفوظة', 'No connection · showing saved data')} style={{ borderRadius: 0, borderInline: 'none' }} />}><Card pad={16}><DL rows={[[$('الحالة', 'Status'), <StatusPill kind={statusEntries()[0][0]} s={statusEntries()[0][1]} />], [$('المبلغ', 'Amount'), <Money v={25.5} />]]} /></Card><Field label={$('ملاحظة', 'Note')} multiline placeholder={$('اكتب ملاحظة', 'Write a note')} /></PhoneApp>; };
+const PhoneSheet = () => { const { $ } = useL(); return <PhoneApp title={$('الرئيسية', 'Home')} active={(FX.nav.phone[0] || {}).id} overlay={<Sheet title={$('جديد', 'New')} foot={<Btn size="xl" full>{$('إنشاء', 'Create')}</Btn>}><Field label={$('الاسم', 'Name')} focus placeholder={$('اكتب الاسم', 'Type a name')} /></Sheet>}><ShellList /></PhoneApp>; };
+const PhoneBlankDemo = () => { const C = useC(); const { $ } = useL(); return <PhoneBlank><Col gap={20} style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 32, textAlign: 'center' }}><Wordmark size={34} /><Tx r="h2">{$('أهلاً بك', 'Welcome')}</Tx><Tx r="body" c={C.textSecondary}>{FX.project.tagline[useL().isAr ? 'ar' : 'en']}</Tx><PhoneField v="79 000 0000" style={{ width: '100%' }} /><Btn size="xl" full>{$('متابعة', 'Continue')}</Btn></Col></PhoneBlank>; };
+const DesktopMain = () => { const { $ } = useL(); return <DesktopApp active={(FX.nav.desktop[0] && FX.nav.desktop[0].items[0].id)} title={$('الرئيسية', 'Home')} actions={<Btn icon="plus">{$('جديد', 'New')}</Btn>} toast={<Toast desktop bottom={24} action={$('تراجع', 'Undo')}>{$('تم الحفظ.', 'Saved.')}</Toast>}><KpiRow items={[{ label: $('اليوم', 'Today'), value: '12' }, { label: $('هذا الأسبوع', 'This week'), value: '48', delta: { up: true, t: '+8%' } }, { label: $('المبيعات', 'Sales'), value: <Money v={1840} r="moneyXL" /> }, { label: $('متأخر', 'Late'), value: '3', tone: 'alert' }]} /><Tables /></DesktopApp>; };
+const DesktopPanel = () => { const { $ } = useL(); return <DesktopApp collapsed active={(FX.nav.desktop[0] && FX.nav.desktop[0].items[1] || {}).id} crumb={<><span>{$('القائمة', 'Items')}</span><Ic n="chevR" s={14} /></>} title="REF-2026-0042" search={false} overlay={<SidePanel title={$('تعديل', 'Edit')} foot={<><Btn v="secondary">{$('إلغاء', 'Cancel')}</Btn><Btn>{$('حفظ', 'Save')}</Btn></>}><Inputs2 /></SidePanel>}><ShellList /></DesktopApp>; };
+const Inputs2 = () => { const { $ } = useL(); return <><Field label={$('الاسم', 'Name')} value={$('العنصر', 'Item')} /><MoneyField label={$('المبلغ', 'Amount')} v={25.5} /><DateTimeField label={$('الموعد', 'When')} date={FX.now.date} time={FX.now.time} /></>; };
+const DesktopBlankDemo = () => { const C = useC(); const { $ } = useL(); return <DesktopBlank bg={C.surface2}><Col gap={18} style={{ margin: 'auto', width: 420, alignItems: 'stretch' }}><Wordmark size={36} /><Card pad={28}><Col gap={14}><Tx r="h2">{$('تسجيل الدخول', 'Sign in')}</Tx><Field label={$('البريد الإلكتروني', 'Email')} value="name@example.com" dir="ltr" /><Btn full size="lg">{$('متابعة', 'Continue')}</Btn></Col></Card></Col></DesktopBlank>; };
+const TabletMain = () => { const { $ } = useL(); return <TabletApp active={(FX.nav.tablet[0] || {}).id} title={$('الرئيسية', 'Home')} sub={$('نظرة عامة', 'Overview')} actions={<Btn icon="plus">{$('جديد', 'New')}</Btn>}><KpiRow items={[{ label: $('اليوم', 'Today'), value: '12' }, { label: $('هذا الأسبوع', 'This week'), value: '48' }, { label: $('متأخر', 'Late'), value: '3', tone: 'alert' }]} /><DsGrid cols={2} gap={20}><Col gap={12}><ShellList /></Col><Tables /></DsGrid></TabletApp>; };
+const ShellRow = ({ label, device, children }) => { const C = useC(); return <div><DsLabel>{label}</DsLabel><Pair device={device}>{children}</Pair></div>; };
+const S9 = () => <ChapterBand num={9} name="App shells" nameAr="هياكل التطبيق" title="Three shells; navigation comes from props." lede="PhoneApp, DesktopApp and TabletApp draw the chrome; the tabs, sidebar and rail are passed in, with defaults in the fixture." lane="Phone root screens show avatar, title, search and bell over a tab bar; child screens show back and one overflow, and a sticky action replaces the tabs. Full-bleed screens use PhoneBlank and DesktopBlank.">
+  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '56px 64px' }}>
+    <ShellRow label="PhoneApp · root" device="phone"><PhoneRoot /></ShellRow>
+    <ShellRow label="PhoneApp · child + banner + bottom" device="phone"><PhoneChild /></ShellRow>
+    <ShellRow label="PhoneApp + Sheet" device="phone"><PhoneSheet /></ShellRow>
+    <ShellRow label="PhoneBlank" device="phone"><PhoneBlankDemo /></ShellRow>
+    <ShellRow label="DesktopApp · sidebar + toast" device="desktop"><DesktopMain /></ShellRow>
+    <ShellRow label="DesktopApp · collapsed + SidePanel" device="desktop"><DesktopPanel /></ShellRow>
+    <ShellRow label="DesktopBlank" device="desktop"><DesktopBlankDemo /></ShellRow>
+    <ShellRow label="TabletApp · nav rail" device="tablet"><TabletMain /></ShellRow>
+  </div>
+</ChapterBand>;
+
+const CHAPTERS = [{ num: 1, name: 'Colour' }, { num: 2, name: 'Type' }, { num: 3, name: 'Icons' }, { num: 4, name: 'Buttons and controls' }, { num: 5, name: 'Inputs' }, { num: 6, name: 'Status and feedback' }, { num: 7, name: 'Data display' }, { num: 8, name: 'Overlays' }, { num: 9, name: 'App shells' }];
+const App = () => <BoardApp board="B0 DESIGN SYSTEM" title={`${FX.project.name} · Design system`} subtitle="Tokens, type, components and shells · AR + EN" index={BOARDS_INDEX} chapters={CHAPTERS} zoom0={0.22}>
+  <Cover /><S1 /><S2 /><S3 /><S4 /><S5 /><S6 /><S7 /><S8 /><S9 />
+</BoardApp>;
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="/*__FONTS__*/" rel="stylesheet"/>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:system-ui,sans-serif; overflow:hidden; -webkit-font-smoothing:antialiased; font-feature-settings:"kern","liga"; }
+    [lang="ar"], [dir="rtl"] { font-feature-settings:"ss01","kern","liga"; }
+    #root { width:100vw; height:100vh; }
+    p, .pretty { text-wrap:pretty; }
+    button, input, select, textarea { font:inherit; }
+    /* App bodies never squash their cards: long content runs off the bottom of the frame (a natural cut), it is not clipped inside each card. Inline flex on a child still wins. */
+    .bk-body > * { flex-shrink: 0; }
+    .bk-focus:focus-visible { outline:2px solid var(--focus); outline-offset:2px; }
+    @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.55;transform:scale(1.35)} }
+    @keyframes pulse-op  { 0%,100%{opacity:1} 50%{opacity:.5} }
+    @keyframes bk-spin   { to { transform: rotate(360deg) } }
+    .bk-spin { animation: bk-spin .9s linear infinite; transform-origin: 50% 50%; }
+    .pulse-dot { animation:pulse-dot 1.6s ease-in-out infinite; }
+    .skel { animation:pulse-op 1.6s ease-in-out infinite; }
+    @media (prefers-reduced-motion: reduce){ *{animation:none!important;transition:none!important} }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>

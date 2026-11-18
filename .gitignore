@@ -10,8 +10,12 @@
 !/qa/
 !/.claude/
 !/Example/
+!/Example-Studio/
 
 node_modules/
+# studio projects: scratch output and generated tokens (rebuilt by shared/build.sh)
+exports/
+Design-System/tokens.*
 QA_screenshots/
 .DS_Store
 *.log
